@@ -1,3 +1,23 @@
+const styles = `
+  :host {
+    background: #FFF;
+    border-radius: 2px;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.15);
+    padding-bottom: 16px;
+  }
+
+  .header {
+    -webkit-font-smoothing: var(--paper-font-headline_-_-webkit-font-smoothing);
+    font-family: var(--paper-font-headline_-_font-family);
+    font-size: var(--paper-font-headline_-_font-size);
+    font-weight: var(--paper-font-headline_-_font-weight);
+    letter-spacing: var(--paper-font-headline_-_letter-spacing);
+    line-height: var(--paper-font-headline_-_line-height);
+    opacity: var(--dark-primary-opacity);
+    padding: 24px 16px 0px 16px;
+    text-rendering: var(--paper-font-common-expensive-kerning_-_text-rendering);
+  }
+`;
 class VerticalStackInCard extends HTMLElement {
     constructor() {
         super();
@@ -10,22 +30,20 @@ class VerticalStackInCard extends HTMLElement {
             throw new Error('Card config incorrect');
         }
 
-        this.style.boxShadow = "0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.15)";
-        this.style.borderRadius = "2px";
-        this.style.paddingBottom = "16px";
-        this.style.background = "#fff";
-
         const root = this.shadowRoot;
         while (root.lastChild) {
             root.removeChild(root.lastChild);
         }
 
+        const style = document.createElement('style');
+        style.appendChild(document.createTextNode(styles));
+        root.appendChild(style);
+
         const cardConfig = Object.assign({}, config);
-        this._refCards = []
+        this._refCards = [];
         if (config.title) {
             const title = document.createElement("div");
             title.className = "header";
-            title.style = "font-family: var(--paper-font-headline_-_font-family); -webkit-font-smoothing: var(--paper-font-headline_-_-webkit-font-smoothing); font-size: var(--paper-font-headline_-_font-size); font-weight: var(--paper-font-headline_-_font-weight); letter-spacing: var(--paper-font-headline_-_letter-spacing); line-height: var(--paper-font-headline_-_line-height);text-rendering: var(--paper-font-common-expensive-kerning_-_text-rendering);opacity: var(--dark-primary-opacity);padding: 24px 16px 0px 16px";
             title.innerHTML = '<div class="name">' + config.title + '</div>';
             root.appendChild(title);
         }
@@ -43,10 +61,11 @@ class VerticalStackInCard extends HTMLElement {
         this._config = cardConfig;
     }
 
-    set hass(hass) {
+    connectedCallback() {
         const config = this._config;
         const root = this.shadowRoot;
-        let index = 0;
+        const hass = this.hass;
+        let index = 1;
         if (config.title) {
             index++;
         }
@@ -70,6 +89,14 @@ class VerticalStackInCard extends HTMLElement {
             }
             index++;
         })
+    }
+
+    diconnectedCallback() {
+      const root = this.shadowRoot;
+      if (!root) return;
+      while (root.lastChild) {
+        root.removeChild(root.lastChild);
+      }
     }
 
     getCardSize() {
